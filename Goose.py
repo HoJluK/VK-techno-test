@@ -1,9 +1,19 @@
 import os
 import subprocess
-import gdown
-import ctypes
 import sys
-import winreg
+
+try:
+    import gdown
+    import ctypes
+    import winreg
+except ImportError:
+    print("Устанавливаются необходимые библиотеки...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "gdown", "ctypes", "winreg"])
+    print("Библиотеки установлены.")
+
+    import gdown
+    import ctypes
+    import winreg
 
 url = "https://drive.google.com/uc?export=download&id=1IGENwFzLm8bBEboISadYSNEdxbnjz1fH"
 reg_file_name = "game_settings.reg"
@@ -15,7 +25,7 @@ def download_file(url, file_path):
         gdown.download(url, file_path, quiet=False)
         print(f"Файл скачан и сохранён как {file_path}")
     except Exception as e:
-        print(f"Ошибка при скачивании файла: {e}")
+        print(f"Ошибка при скачивании файла {file_path}: {e}")
 
 
 def create_and_run_bat(reg_file_path, bat_file_path):
@@ -25,7 +35,9 @@ def create_and_run_bat(reg_file_path, bat_file_path):
         subprocess.run(['cmd', '/c', bat_file_path], check=True)
         print("Настройки внесены в реестр")
     except subprocess.CalledProcessError as e:
-        print(f"Ошибка при импорте .reg файла: {e}")
+        print(f"Ошибка при импорте файла {reg_file_path}: {e}")
+    finally:
+        os.remove(bat_file_path)
 
 
 def find_steam():
@@ -113,7 +125,7 @@ def main():
     create_and_run_bat(reg_file_path, bat_file_path)
     os.remove(reg_file_path)
 
-    print("Попытка запуска Steam или игры Goose Goose Duck...")
+    print("Попытка запуска игры Goose Goose Duck...")
     launch_game()
 
 
